@@ -1225,12 +1225,12 @@ providers/fips.module.sources.new: configdata.pm
 	  cd sources-tmp \
 	  && $$srcdir/Configure --banner=Configured enable-fips -O0 \
 	  && ./configdata.pm --query 'get_sources("providers/fips")' > sources1 \
-	  && $(MAKE) -sj 4 build_generated providers/fips.so \
+	  && $(MAKE) -sj 4 build_generated $(FIPSMODULE) \
 	  && find . -name '*.d' | xargs cat > dep1 \
           && $(MAKE) distclean \
 	  && $$srcdir/Configure --banner=Configured enable-fips no-asm -O0 \
 	  && ./configdata.pm --query 'get_sources("providers/fips")' > sources2 \
-	  && $(MAKE) -sj 4 build_generated providers/fips.so \
+	  && $(MAKE) -sj 4 build_generated $(FIPSMODULE) \
 	  && find . -name '*.d' | xargs cat > dep2 \
 	  && cat sources1 sources2 \
 	     | grep -v ' : \\$$' | grep -v util/providers.num \
@@ -1393,8 +1393,8 @@ providers/fips.checksum.new: providers/fips.module.sources.new
 	  && cat $$sources \
 	         | xargs ./util/fips-checksums.sh ) \
 	         > providers/fips-sources.checksums.new \
-	&& sha256sum providers/fips-sources.checksums.new \
-	     | sed -e 's|\.new||' > providers/fips.checksum.new
+	&& openssl sha256 -r providers/fips-sources.checksums.new \
+	     | sed -e 's|\*| |' -e 's|\.new||' > providers/fips.checksum.new
 
 fips-checksums: providers/fips.checksum.new
 
